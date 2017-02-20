@@ -23,7 +23,7 @@ class HomeController @Inject() (pc: PudgeClient) extends Controller {
     Ok("Your new application is ready.")
   }
 
-  def hit(domainId: Int, url: String, screen: String, referrer: String) = Action { request =>
+  def hit(domainId: String, url: String, screen: String, referrer: String) = Action { request =>
     val ip = request.remoteAddress
     val host = request.host
     val domain = request.domain
@@ -31,7 +31,7 @@ class HomeController @Inject() (pc: PudgeClient) extends Controller {
     val res =   pc.recordEvent(domainId, "HIT", ip, host, url, screen: String)
     Ok(res)
   }
-  def demHit(domainId: Int, url: String, screen: String, referrer: String) = Action { request =>
+  def demHit(domainId: String, url: String, screen: String, referrer: String) = Action { request =>
     val ip = request.remoteAddress
     val host = request.host
     val domain = request.domain

@@ -4,5 +4,5 @@
 
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.index
-GET    /hit                         controllers.HomeController.hit(did: Int, u: String ?= "xz", s: String ?= "unknown", r: String ?= "")
-GET    /demHit                      controllers.HomeController.demHit(did: Int, u: String ?= "xz", s: String ?= "unknown", r: String ?= "")
+GET    /hit                         controllers.HomeController.hit(did: String, u: String ?= "xz", s: String ?= "unknown", r: String ?= "")
+GET    /demHit                      controllers.HomeController.demHit(did: String, u: String ?= "xz", s: String ?= "unknown", r: String ?= "")

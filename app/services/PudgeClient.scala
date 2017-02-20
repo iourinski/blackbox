@@ -45,7 +45,7 @@ class PudgeClient {
   }
 
   def recordEvent(
-                   domainId: Int,
+                   domainId: String,
                    event: String,
                    ip: String,
                    host: String,
@@ -67,7 +67,7 @@ class PudgeClient {
                     screen: String,
                     host: String,
                     ip: String,
-                    domainId: Int
+                    domainId: String
                   ): (String, String) = {
 
     val ts: String  = tsFormat.format(System.currentTimeMillis())
