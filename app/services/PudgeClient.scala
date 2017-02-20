@@ -23,7 +23,12 @@ class PudgeClient {
   tsFormat.setTimeZone(tz)
   //import scala.concurrent.ExecutionContext.Implicits.global // TODO: получать exec context извне
   val memcachedClient: MemcachedClient =  new MemcachedClient(new InetSocketAddress("127.0.0.1", 11213))
-  memcachedClient.getConnection
+  try {
+    memcachedClient.getConnection
+  } catch {
+    case e: Throwable => println("Can't connect")
+  }
+
 
   private def writeKeyToPudge(key: String, value: String): Boolean = {
     memcachedClient.set(key, 0, value.getBytes).get(10, TimeUnit.SECONDS)
