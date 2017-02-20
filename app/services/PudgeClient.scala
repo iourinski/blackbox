@@ -2,14 +2,15 @@ package services
 
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
+import java.text.SimpleDateFormat
+import java.util.TimeZone
 
 import net.spy.memcached.{CachedData, MemcachedClient}
 import net.spy.memcached.transcoders.Transcoder
+
 import scala.util.hashing.MurmurHash3
-//import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
-//import scala.collection.convert.WrapAsJava._
-//import scala.collection.convert.WrapAsScala._
+
 
 /**
   * Базовые запросы к memcached (либо другой ДБ, реализующей протокол memcached)
@@ -17,29 +18,57 @@ import scala.concurrent.duration.Duration
 class PudgeClient {
 
   private val timeout = Duration(2, TimeUnit.MINUTES)
-
+  val tz = TimeZone.getTimeZone("Europe/Moscow")
+  val tsFormat = new SimpleDateFormat("yyMMddHHmmss")
+  tsFormat.setTimeZone(tz)
   //import scala.concurrent.ExecutionContext.Implicits.global // TODO: получать exec context извне
   val memcachedClient: MemcachedClient =  new MemcachedClient(new InetSocketAddress("127.0.0.1", 11213))
   memcachedClient.getConnection
+
   private def writeKeyToPudge(key: String, value: String): Boolean = {
     memcachedClient.set(key, 0, value.getBytes).get(10, TimeUnit.SECONDS)
   }
 
-  def recordEvent(event: String, ip: String, host: String, domain: String, url: String,screen: String): String = {
-    val key = formKey(event, url, screen, host, ip)
+  def readFromPudge(key: String): String = {
     try {
-      writeKeyToPudge(key, "OK")
+      memcachedClient.get(key).toString
+    } catch {
+      case e: Throwable =>
+        println(e.getMessage)
+        return ""
+    }
+  }
+
+  def recordEvent(
+                   domainId: Int,
+                   event: String,
+                   ip: String,
+                   host: String,
+                   url: String,
+                   screen: String
+                 ): String = {
+    val (key, value) = formKeyValue(event, url, screen, host, ip, domainId)
+    try {
+      writeKeyToPudge(key, value)
     } catch {
       case e: Throwable => println(e.getMessage)
     }
-
     key
   }
 
-  def formKey(event: String, url: String,screen: String, host: String, ip: String): String = {
-    val age: Long  = (2524608000L - System.currentTimeMillis()/1000)
+  def formKeyValue(
+                    event: String,
+                    url: String,
+                    screen: String,
+                    host: String,
+                    ip: String,
+                    domainId: Int
+                  ): (String, String) = {
+
+    val ts: String  = tsFormat.format(System.currentTimeMillis())
+
     val uid = scala.util.hashing.MurmurHash3.stringHash(ip + screen)
-    return event + ":" + host + ":" +  age + ":" + uid + ":" + url
+    return (domainId + ":" + ts + ":"  + uid, event + ":" + url)
   }
 }
 

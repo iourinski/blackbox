@@ -20,16 +20,25 @@ class HomeController @Inject() (pc: PudgeClient) extends Controller {
    * a path of `/`.
    */
   def index = Action {
-    Ok("<html><body><h1>Your new application is ready.</h1></body></html>")
+    Ok("Your new application is ready.")
   }
-  def hit(url: String, screen: String, referrer: String) = Action { request =>
+
+  def hit(domainId: Int, url: String, screen: String, referrer: String) = Action { request =>
     val ip = request.remoteAddress
     val host = request.host
     val domain = request.domain
 
-    val res =   pc.recordEvent("HIT",ip,host,domain,url,screen: String)
-
+    val res =   pc.recordEvent(domainId, "HIT", ip, host, url, screen: String)
     Ok(res)
+  }
+  def demHit(domainId: Int, url: String, screen: String, referrer: String) = Action { request =>
+    val ip = request.remoteAddress
+    val host = request.host
+    val domain = request.domain
+
+    val key =   pc.recordEvent(domainId, "HIT", ip, host, url, screen: String)
+    val res = pc.readFromPudge(key)
+    Ok("wrote key " + key + " with value " + res)
   }
 
 }
