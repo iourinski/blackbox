@@ -5,6 +5,8 @@ import javax.inject._
 import play.api._
 import play.api.mvc._
 import services.PudgeClient
+import play.api.Logger
+
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -19,6 +21,8 @@ class HomeController @Inject() (pc: PudgeClient) extends Controller {
    * will be called when the application receives a `GET` request with
    * a path of `/`.
    */
+  val logger: Logger = Logger(getClass)
+
   def index = Action {
     Ok("Your new application is ready.")
   }
@@ -27,7 +31,7 @@ class HomeController @Inject() (pc: PudgeClient) extends Controller {
     val ip = request.remoteAddress
     val host = request.host
     val domain = request.domain
-
+    logger.info("request from " + ip + " for " + url)
     val res =   pc.recordEvent(domainId, "HIT", ip, host, url, screen: String)
     Ok(res)
   }
